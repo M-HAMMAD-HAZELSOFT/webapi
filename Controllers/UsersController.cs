@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Models;
+using webapi.Services.UserService;
 
 namespace webapi.Controllers
 {
@@ -7,26 +8,30 @@ namespace webapi.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        // In-memory storage for users
-        private static List<Users> users = new List<Users>();
+        private readonly IUserService _userService;
+
+        public UsersController(IUserService userService)
+        {
+            _userService = userService;
+        }
 
         /// <summary>
         /// Retrieves all users.
         /// </summary>
-        [HttpGet]
-        public ActionResult<IEnumerable<Users>> GetUsers()
+        [HttpGet("GetAll")]
+        public ActionResult<IEnumerable<Users>> GetAllUsers()
         {
-            return Ok(users);
+            return Ok(_userService.GetAllUsers());
         }
 
         /// <summary>
         /// Retrieves a user by ID.
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
-        [HttpGet("{id}")]
-        public ActionResult<Users> GetUser(int id)
+        [HttpGet("GetById/{id}")]
+        public ActionResult<Users> GetUserById(int id)
         {
-            var user = users.FirstOrDefault(u => u.Id == id);
+            var user = _userService.GetUserById(id);
             if (user == null)
             {
                 return BadRequest(new { message = "User not found" });
@@ -38,15 +43,10 @@ namespace webapi.Controllers
         /// Creates a new user.
         /// </summary>
         /// <param name="user">The user to create.</param>
-        [HttpPost]
-        public ActionResult<Users> PostUser(Users user)
+        [HttpPost("Add")]
+        public ActionResult<Users> AddUser(Users user)
         {
-            // Assign a unique ID to the user
-            user.Id = users.Count + 1;
-
-            // Add the user to the in-memory storage
-            users.Add(user);
-
+            _userService.AddUser(user);
             return Ok(new { message = "User created" });
         }
 
@@ -55,43 +55,30 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
-        [HttpPut("{id}")]
-        public IActionResult PutUser(int id, Users updatedUser)
+        [HttpPut("Update/{id}")]
+        public IActionResult UpdateUser(int id, Users updatedUser)
         {
-            // Find the user to update by ID
-            var user = users.FirstOrDefault(u => u.Id == id);
+            var user = _userService.UpdateUser(id, updatedUser);
             if (user == null)
             {
                 return BadRequest(new { message = "User not found" });
             }
-
-            // Update the user
-            user.Name = updatedUser.Name;
-            user.Email = updatedUser.Email;
-            user.Password = updatedUser.Password;
-
-            return Ok(new { message = "User updated" });         
+            return Ok(new { message = "User updated" });
         }
 
         /// <summary>
         /// Deletes a user by ID.
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         public IActionResult DeleteUser(int id)
         {
-            // Find the user to delete by ID
-            var user = users.FirstOrDefault(u => u.Id == id);
+            var user = _userService.DeleteUser(id);
             if (user == null)
             {
                 return BadRequest(new { message = "User not found" });
             }
-
-            // Remove the user from the in-memory storage
-            users.Remove(user);
-
-            return Ok(new {message = "User deleted"});
-
+            return Ok(new { message = "User deleted" });
         }
     }
 }
