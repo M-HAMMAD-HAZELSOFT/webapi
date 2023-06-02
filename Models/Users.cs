@@ -3,14 +3,14 @@
 namespace webapi.Models
 {
     /// <summary>
-    /// The User Model
+    /// The Users Model
     /// </summary>
     public class Users
     {
         /// <summary>
         /// Gets or sets the user id.
         /// </summary>
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the user name.
