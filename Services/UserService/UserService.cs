@@ -33,23 +33,16 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         /// <returns>The user with the specified ID, or null if not found.</returns>
-        public async Task<UsersDto> GetUserById(int id)
+        public async Task<UsersDto> GetUserById(string id)
         {
-            try
+            UsersDto result = _mapper.Map<UsersDto>(users.FirstOrDefault(c => c.Id == id));
+            if (result != null)
             {
-                UsersDto result = _mapper.Map<UsersDto>(users.FirstOrDefault(c => c.Id == id));
-                if (result != null)
-                {
-                    return result;
-                }
-                else
-                {
-                    throw new Exception("User not found.");
-                }
+                return result;
             }
-            catch (Exception)
+            else
             {
-                throw;
+                throw new Exception("User not found.");
             }
         }
 
@@ -62,15 +55,7 @@ namespace webapi.Services.UserService
         {
             Users user = _mapper.Map<Users>(newUser);
 
-            // Assign a unique ID to the user
-            if (users.Any())
-            {
-                user.Id = users.Max(u => u.Id) + 1;
-            }
-            else
-            {
-                user.Id = 1;
-            }
+            user.Id = Guid.NewGuid().ToString();
 
             // Add the user to the in-memory storage
             users.Add(user);
@@ -84,28 +69,21 @@ namespace webapi.Services.UserService
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
         /// <returns>The updated user object, or null if the user was not found.</returns>
-        public async Task<UsersDto> UpdateUser(int id, UsersDto updatedUser)
+        public async Task<UsersDto> UpdateUser(string id, UsersDto updatedUser)
         {
-            try
+            // Find the user to update by ID
+            Users user = users.FirstOrDefault(u => u.Id == id);
+            if (user != null)
             {
-                // Find the user to update by ID
-                Users user = users.FirstOrDefault(u => u.Id == id);
-                if (user != null)
-                {
-                    // Update the user 
-                    user.Name = updatedUser.Name;
-                    user.Email = updatedUser.Email;
-                    user.Password = updatedUser.Password;
-                    return _mapper.Map<UsersDto>(user);
-                }
-                else
-                {
-                    throw new Exception("User not found.");
-                }
+                // Update the user 
+                user.Name = updatedUser.Name;
+                user.Email = updatedUser.Email;
+                user.Password = updatedUser.Password;
+                return _mapper.Map<UsersDto>(user);
             }
-            catch (Exception)
+            else
             {
-                throw;
+                throw new Exception("User not found.");
             }
         }
 
@@ -114,27 +92,20 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         /// <returns>The deleted user object, or null if the user was not found.</returns>
-        public async Task<List<UsersDto>> DeleteUser(int id)
+        public async Task<List<UsersDto>> DeleteUser(string id)
         {
-            try
+            // Find the user to delete by ID
+            Users user = users.FirstOrDefault(u => u.Id == id);
+            if (user != null)
             {
-                // Find the user to delete by ID
-                Users user = users.FirstOrDefault(u => u.Id == id);
-                if (user != null)
-                {
-                    // Remove the user from the in-memory storage
-                    users.Remove(user);
+                // Remove the user from the in-memory storage
+                users.Remove(user);
 
-                    return (users.Select(c => _mapper.Map<UsersDto>(c))).ToList();
-                }
-                else
-                {
-                    throw new Exception("User not found.");
-                }
+                return (users.Select(c => _mapper.Map<UsersDto>(c))).ToList();
             }
-            catch (Exception)
+            else
             {
-                throw;
+                throw new Exception("User not found.");
             }
         }
     }

@@ -8,7 +8,7 @@ namespace webapi
     {
         public AutoMapperProfile()
         {
-            CreateMap<Users, UsersDto>();
+            CreateMap<Users, UsersDto>().ForMember(dest => dest.Password, opt => opt.Ignore());
             CreateMap<UsersDto, Users>();
         }
     }
