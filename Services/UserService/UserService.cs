@@ -23,11 +23,9 @@ namespace webapi.Services.UserService
         /// Retrieves all users.
         /// </summary>
         /// <returns>A list of all users.</returns>
-        public async Task<ServiceResponse<List<GetUserDto>>> GetAllUsers()
+        public async Task<List<UsersDto>> GetAllUsers()
         {
-            ServiceResponse<List<GetUserDto>> serviceResponse = new ServiceResponse<List<GetUserDto>>();
-            serviceResponse.Items = (users.Select(c => _mapper.Map<GetUserDto>(c))).ToList();
-            return serviceResponse;
+            return (users.Select(c => _mapper.Map<UsersDto>(c))).ToList();
         }
 
         /// <summary>
@@ -35,11 +33,24 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         /// <returns>The user with the specified ID, or null if not found.</returns>
-        public async Task<ServiceResponse<GetUserDto>> GetUserById(int id)
+        public async Task<UsersDto> GetUserById(int id)
         {
-            ServiceResponse<GetUserDto> serviceResponse = new ServiceResponse<GetUserDto>();
-            serviceResponse.Items = _mapper.Map<GetUserDto>(users.FirstOrDefault(c => c.Id == id));
-            return serviceResponse;
+            try
+            {
+                UsersDto result = _mapper.Map<UsersDto>(users.FirstOrDefault(c => c.Id == id));
+                if (result != null)
+                {
+                    return result;
+                }
+                else
+                {
+                    throw new Exception("User not found.");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -47,22 +58,24 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="user">The user to add.</param>
         /// <returns>A list of all users including the newly added user.</returns>
-        public async Task<ServiceResponse<List<GetUserDto>>> AddUser(AddUserDto newUser)
+        public async Task<List<UsersDto>> AddUser(UsersDto newUser)
         {
-            ServiceResponse<List<GetUserDto>> serviceResponse = new ServiceResponse<List<GetUserDto>>();
-
             Users user = _mapper.Map<Users>(newUser);
 
             // Assign a unique ID to the user
-            // user.Id = users.Max(u => u.Id) + 1;
-            user.Id = users.Count + 1;
+            if (users.Any())
+            {
+                user.Id = users.Max(u => u.Id) + 1;
+            }
+            else
+            {
+                user.Id = 1;
+            }
 
             // Add the user to the in-memory storage
             users.Add(user);
 
-            serviceResponse.Items = (users.Select(u => _mapper.Map<GetUserDto>(u))).ToList();
-
-            return serviceResponse;
+            return (users.Select(u => _mapper.Map<UsersDto>(u))).ToList();
         }
 
         /// <summary>
@@ -71,27 +84,29 @@ namespace webapi.Services.UserService
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
         /// <returns>The updated user object, or null if the user was not found.</returns>
-        public async Task<ServiceResponse<GetUserDto>> UpdateUser(int id, UpdateUserDto updatedUser)
+        public async Task<UsersDto> UpdateUser(int id, UsersDto updatedUser)
         {
-            ServiceResponse<GetUserDto> serviceResponse = new ServiceResponse<GetUserDto>();
-
             try
             {
                 // Find the user to update by ID
-                Users user = users.First(u => u.Id == id);
-
-                // Update the user 
-                user.Name = updatedUser.Name; 
-                user.Email = updatedUser.Email;
-                user.Password = updatedUser.Password;
-                serviceResponse.Items = _mapper.Map<GetUserDto>(user);
+                Users user = users.FirstOrDefault(u => u.Id == id);
+                if (user != null)
+                {
+                    // Update the user 
+                    user.Name = updatedUser.Name;
+                    user.Email = updatedUser.Email;
+                    user.Password = updatedUser.Password;
+                    return _mapper.Map<UsersDto>(user);
+                }
+                else
+                {
+                    throw new Exception("User not found.");
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                serviceResponse.Success = false;
-                serviceResponse.Message = ex.Message;
+                throw;
             }
-            return serviceResponse;
         }
 
         /// <summary>
@@ -99,26 +114,28 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         /// <returns>The deleted user object, or null if the user was not found.</returns>
-        public async Task<ServiceResponse<List<GetUserDto>>> DeleteUser(int id)
+        public async Task<List<UsersDto>> DeleteUser(int id)
         {
-            ServiceResponse<List<GetUserDto>> serviceResponse = new ServiceResponse<List<GetUserDto>>();
-
             try
             {
                 // Find the user to delete by ID
-                Users user = users.First(u => u.Id == id);
+                Users user = users.FirstOrDefault(u => u.Id == id);
+                if (user != null)
+                {
+                    // Remove the user from the in-memory storage
+                    users.Remove(user);
 
-                // Remove the user from the in-memory storage
-                users.Remove(user);
-
-                serviceResponse.Items = (users.Select(c => _mapper.Map<GetUserDto>(c))).ToList();
+                    return (users.Select(c => _mapper.Map<UsersDto>(c))).ToList();
+                }
+                else
+                {
+                    throw new Exception("User not found.");
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                serviceResponse.Success = false;
-                serviceResponse.Message = ex.Message;
+                throw;
             }
-            return serviceResponse;
         }
     }
 }

@@ -8,8 +8,8 @@ namespace webapi
     {
         public AutoMapperProfile()
         {
-            CreateMap<Users, GetUserDto>();
-            CreateMap<AddUserDto, Users>();
+            CreateMap<Users, UsersDto>();
+            CreateMap<UsersDto, Users>();
         }
     }
 }
