@@ -19,9 +19,9 @@ namespace webapi.Controllers
         /// Retrieves all users.
         /// </summary>
         [HttpGet("GetAll")]
-        public ActionResult<IEnumerable<Users>> GetAllUsers()
+        public async Task<ActionResult<IEnumerable<Users>>> GetAllUsers()
         {
-            return Ok(_userService.GetAllUsers());
+            return Ok(await _userService.GetAllUsers());
         }
 
         /// <summary>
@@ -29,9 +29,9 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         [HttpGet("GetById/{id}")]
-        public ActionResult<Users> GetUserById(int id)
+        public async Task<ActionResult<Users>> GetUserById(int id)
         {
-            var user = _userService.GetUserById(id);
+            var user = await _userService.GetUserById(id);
             if (user == null)
             {
                 return BadRequest(new { message = "User not found" });
@@ -44,9 +44,9 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="user">The user to create.</param>
         [HttpPost("Add")]
-        public ActionResult<Users> AddUser(Users user)
+        public async Task<ActionResult<Users>> AddUser(Users user)
         {
-            _userService.AddUser(user);
+            await _userService.AddUser(user);
             return Ok(new { message = "User created" });
         }
 
@@ -56,9 +56,9 @@ namespace webapi.Controllers
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
         [HttpPut("Update/{id}")]
-        public IActionResult UpdateUser(int id, Users updatedUser)
+        public async Task<IActionResult> UpdateUser(int id, Users updatedUser)
         {
-            var user = _userService.UpdateUser(id, updatedUser);
+            var user = await _userService.UpdateUser(id, updatedUser);
             if (user == null)
             {
                 return BadRequest(new { message = "User not found" });
@@ -71,9 +71,9 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         [HttpDelete("Delete/{id}")]
-        public IActionResult DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = _userService.DeleteUser(id);
+            var user = await _userService.DeleteUser(id);
             if (user == null)
             {
                 return BadRequest(new { message = "User not found" });

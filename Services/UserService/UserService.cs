@@ -14,7 +14,7 @@ namespace webapi.Services.UserService
         /// Retrieves all users.
         /// </summary>
         /// <returns>A list of all users.</returns>
-        public List<Users> GetAllUsers()
+        public async Task<List<Users>> GetAllUsers()
         {
             return users;
         }
@@ -24,7 +24,7 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         /// <returns>The user with the specified ID, or null if not found.</returns>
-        public Users GetUserById(int id)
+        public async Task<Users> GetUserById(int id)
         {
             var user = users.FirstOrDefault(u => u.Id == id);
             return user;
@@ -35,7 +35,7 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="user">The user to add.</param>
         /// <returns>A list of all users including the newly added user.</returns>
-        public List<Users> AddUser(Users user)
+        public async Task<List<Users>> AddUser(Users user)
         {
             // Assign a unique ID to the user
             user.Id = users.Count + 1;
@@ -51,7 +51,7 @@ namespace webapi.Services.UserService
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
         /// <returns>The updated user object, or null if the user was not found.</returns>
-        public Users UpdateUser(int id, Users updatedUser)
+        public async Task<Users> UpdateUser(int id, Users updatedUser)
         {
             // Find the user to update by ID
             var user = users.FirstOrDefault(u => u.Id == id);
@@ -70,7 +70,7 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         /// <returns>The deleted user object, or null if the user was not found.</returns>
-        public Users DeleteUser(int id)
+        public async Task<Users> DeleteUser(int id)
         {
             // Find the user to delete by ID
             var user = users.FirstOrDefault(u => u.Id == id);
