@@ -11,21 +11,21 @@ namespace webapi.Services.UserService
         /// Retrieves all users.
         /// </summary>
         /// <returns>A list of all users.</returns>
-        Task<List<Users>> GetAllUsers();
+        Task<ServiceResponse<List<Users>>> GetAllUsers();
 
         /// <summary>
         /// Retrieves a user by their ID.
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         /// <returns>The user with the specified ID.</returns>
-        Task<Users> GetUserById(int id);
+        Task<ServiceResponse<Users>> GetUserById(int id);
 
         /// <summary>
         /// Adds a new user.
         /// </summary>
         /// <param name="user">The user to add.</param>
         /// <returns>A list of all users including the newly added user.</returns>
-        Task<List<Users>> AddUser(Users user);
+        Task<ServiceResponse<List<Users>>> AddUser(Users user);
 
         /// <summary>
         /// Updates an existing user.
@@ -33,13 +33,13 @@ namespace webapi.Services.UserService
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user object.</param>
         /// <returns>The updated user object.</returns>
-        Task<Users> UpdateUser(int id, Users updatedUser);
+        Task<ServiceResponse<Users>> UpdateUser(int id, Users updatedUser);
 
         /// <summary>
         /// Deletes a user by their ID.
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         /// <returns>The deleted user object.</returns>
-        Task<Users> DeleteUser(int id);
+        Task<ServiceResponse<Users>> DeleteUser(int id);
     }
 }
