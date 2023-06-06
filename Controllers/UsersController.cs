@@ -30,7 +30,7 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         [HttpGet("GetById/{id}")]
-        public async Task<ActionResult> GetUserById(string id)
+        public async Task<ActionResult> GetUserById(int id)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace webapi.Controllers
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
         [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateUser(string id, UsersDto updatedUser)
+        public async Task<IActionResult> UpdateUser(int id, UsersDto updatedUser)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
             try
             {

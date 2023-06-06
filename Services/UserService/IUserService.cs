@@ -18,7 +18,7 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         /// <returns>The user with the specified ID.</returns>
-        Task<UsersDto> GetUserById(string id);
+        Task<UsersDto> GetUserById(int id);
 
         /// <summary>
         /// Adds a new user.
@@ -33,13 +33,13 @@ namespace webapi.Services.UserService
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user object.</param>
         /// <returns>The updated user object.</returns>
-        Task<UsersDto> UpdateUser(string id, UsersDto updatedUser);
+        Task<UsersDto> UpdateUser(int id, UsersDto updatedUser);
 
         /// <summary>
         /// Deletes a user by their ID.
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         /// <returns>The deleted user object.</returns>
-        Task<List<UsersDto>> DeleteUser(string id);
+        Task<List<UsersDto>> DeleteUser(int id);
     }
 }
