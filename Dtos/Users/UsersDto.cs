@@ -1,11 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace webapi.Models
+﻿namespace webapi.Dtos.Users
 {
-    /// <summary>
-    /// The Users Model
-    /// </summary>
-    public class Users
+    public class UsersDto
     {
         /// <summary>
         /// Gets or sets the user id.
@@ -15,19 +10,16 @@ namespace webapi.Models
         /// <summary>
         /// Gets or sets the user name.
         /// </summary>
-        [Required]
         public string? Name { get; set; }
 
         /// <summary>
         /// Gets or sets the user email.
         /// </summary>
-        [Required]
         public string? Email { get; set; }
 
         /// <summary>
         /// Gets or sets the user password.
         /// </summary>
-        [Required]
         public string? Password { get; set; }
     }
 }

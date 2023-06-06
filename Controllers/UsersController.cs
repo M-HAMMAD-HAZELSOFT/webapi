@@ -1,53 +1,55 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using webapi.Models;
+using webapi.Dtos.Users;
+using webapi.Services.UserService;
+using webapi.BaseControllers;
 
 namespace webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseController
     {
-        // In-memory storage for users
-        private static List<Users> users = new List<Users>();
+        private readonly IUserService _userService;
+
+        public UsersController(IUserService userService)
+        {
+            _userService = userService;
+        }
 
         /// <summary>
         /// Retrieves all users.
         /// </summary>
-        [HttpGet]
-        public ActionResult<IEnumerable<Users>> GetUsers()
+        [HttpGet("GetAll")]
+        public async Task<ActionResult> GetAllUsers()
         {
-            return Ok(users);
+            return Ok(new { Items = await _userService.GetAllUsers() });
         }
 
         /// <summary>
         /// Retrieves a user by ID.
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
-        [HttpGet("{id}")]
-        public ActionResult<Users> GetUser(int id)
+        [HttpGet("GetById/{id}")]
+        public async Task<ActionResult> GetUserById(string id)
         {
-            var user = users.FirstOrDefault(u => u.Id == id);
-            if (user == null)
+            try
             {
-                return BadRequest(new { message = "User not found" });
+                return Ok(new { Items = await _userService.GetUserById(id) });
             }
-            return Ok(user);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>
         /// Creates a new user.
         /// </summary>
         /// <param name="user">The user to create.</param>
-        [HttpPost]
-        public ActionResult<Users> PostUser(Users user)
+        [HttpPost("Add")]
+        public async Task<ActionResult> AddUser(UsersDto newUser)
         {
-            // Assign a unique ID to the user
-            user.Id = users.Count + 1;
-
-            // Add the user to the in-memory storage
-            users.Add(user);
-
-            return Ok(new { message = "User created" });
+            return Ok(new { Items = await _userService.AddUser(newUser) });
         }
 
         /// <summary>
@@ -55,43 +57,34 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
-        [HttpPut("{id}")]
-        public IActionResult PutUser(int id, Users updatedUser)
+        [HttpPut("Update/{id}")]
+        public async Task<IActionResult> UpdateUser(string id, UsersDto updatedUser)
         {
-            // Find the user to update by ID
-            var user = users.FirstOrDefault(u => u.Id == id);
-            if (user == null)
+            try
             {
-                return BadRequest(new { message = "User not found" });
+                return Ok(new { Items = await _userService.UpdateUser(id, updatedUser) });
             }
-
-            // Update the user
-            user.Name = updatedUser.Name;
-            user.Email = updatedUser.Email;
-            user.Password = updatedUser.Password;
-
-            return Ok(new { message = "User updated" });         
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>
         /// Deletes a user by ID.
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
-        [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
         {
-            // Find the user to delete by ID
-            var user = users.FirstOrDefault(u => u.Id == id);
-            if (user == null)
+            try
             {
-                return BadRequest(new { message = "User not found" });
+                return Ok(new { Items = await _userService.DeleteUser(id) });
             }
-
-            // Remove the user from the in-memory storage
-            users.Remove(user);
-
-            return Ok(new {message = "User deleted"});
-
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
