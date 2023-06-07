@@ -1,68 +1,36 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using webapi.Models;
 using webapi.Dtos.Users;
-using webapi.Services.UserService;
 using webapi.BaseControllers;
+using webapi.Services.Authorization;
 
 namespace webapi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/")]
     [ApiController]
     public class UsersController : BaseController
     {
-        private readonly IUserService _userService;
+        private readonly IAuthService _authService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IAuthService authService)
         {
-            _userService = userService;
-        }
-
-        /// <summary>
-        /// Retrieves all users.
-        /// </summary>
-        [HttpGet("GetAll")]
-        public async Task<ActionResult> GetAllUsers()
-        {
-            return Ok(new { Items = await _userService.GetAllUsers() });
-        }
-
-        /// <summary>
-        /// Retrieves a user by ID.
-        /// </summary>
-        /// <param name="id">The ID of the user to retrieve.</param>
-        [HttpGet("GetById/{id}")]
-        public async Task<ActionResult> GetUserById(int id)
-        {
-            try
-            {
-                return Ok(new { Items = await _userService.GetUserById(id) });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            _authService = authService;
         }
 
         /// <summary>
         /// Creates a new user.
         /// </summary>
         /// <param name="user">The user to create.</param>
-        [HttpPost("Add")]
+        [HttpPost("Signup")]
         public async Task<ActionResult> AddUser(UsersDto newUser)
-        {
-            return Ok(new { Items = await _userService.AddUser(newUser) });
-        }
-
-        /// <summary>
-        /// Updates an existing user.
-        /// </summary>
-        /// <param name="id">The ID of the user to update.</param>
-        /// <param name="updatedUser">The updated user details.</param>
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UsersDto updatedUser)
         {
             try
             {
-                return Ok(new { Items = await _userService.UpdateUser(id, updatedUser) });
+                return Ok(new
+                {
+                    Items = await _authService.AddUser(
+                        new Users { UserName = newUser.UserName }, newUser.Password)
+                });
             }
             catch (Exception ex)
             {
@@ -71,15 +39,15 @@ namespace webapi.Controllers
         }
 
         /// <summary>
-        /// Deletes a user by ID.
+        /// login a user.
         /// </summary>
-        /// <param name="id">The ID of the user to delete.</param>
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        /// <param name="user">The user to login.</param>
+        [HttpPost("Login")]
+        public async Task<ActionResult> Login(UsersDto user)
         {
             try
             {
-                return Ok(new { Items = await _userService.DeleteUser(id) });
+                return Ok(new { Items = await _authService.Login(user.UserName, user.Password) });
             }
             catch (Exception ex)
             {

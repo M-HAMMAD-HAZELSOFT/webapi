@@ -10,12 +10,7 @@
         /// <summary>
         /// Gets or sets the user name.
         /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user email.
-        /// </summary>
-        public string? Email { get; set; }
+        public string? UserName { get; set; }
 
         /// <summary>
         /// Gets or sets the user password.
