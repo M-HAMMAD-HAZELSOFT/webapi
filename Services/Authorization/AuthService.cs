@@ -129,6 +129,7 @@ namespace webapi.Services.Authorization
             SigningCredentials creds = new SigningCredentials(
                 key, SecurityAlgorithms.HmacSha512Signature);
 
+            // object get the info used to create final token
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
