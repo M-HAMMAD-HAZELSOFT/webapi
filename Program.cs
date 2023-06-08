@@ -1,6 +1,13 @@
+using Microsoft.EntityFrameworkCore;
 using webapi.Services.UserService;
+using webapi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Configure the DataContext with the provided connection string
+builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlServer(connectionString));
 
 // Add services to the container.
 builder.Services.AddControllers();

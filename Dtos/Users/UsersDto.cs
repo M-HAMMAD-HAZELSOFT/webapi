@@ -5,7 +5,7 @@
         /// <summary>
         /// Gets or sets the user id.
         /// </summary>
-        public string? Id { get; set; }
+        public int? Id { get; set; }
 
         /// <summary>
         /// Gets or sets the user name.

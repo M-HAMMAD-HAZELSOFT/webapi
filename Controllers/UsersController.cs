@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using webapi.Models;
 using webapi.Dtos.Users;
-using webapi.Services.UserService;
 using webapi.BaseControllers;
+using webapi.Services.UserService;
 
 namespace webapi.Controllers
 {
@@ -10,10 +12,12 @@ namespace webapi.Controllers
     public class UsersController : BaseController
     {
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -22,7 +26,9 @@ namespace webapi.Controllers
         [HttpGet("GetAll")]
         public async Task<ActionResult> GetAllUsers()
         {
-            return Ok(new { Items = await _userService.GetAllUsers() });
+            var users = GetMappedUsersList(await _userService.GetAllUsers());
+
+            return Ok(new { Items = users });
         }
 
         /// <summary>
@@ -30,11 +36,13 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         [HttpGet("GetById/{id}")]
-        public async Task<ActionResult> GetUserById(string id)
+        public async Task<ActionResult> GetUserById(int id)
         {
             try
             {
-                return Ok(new { Items = await _userService.GetUserById(id) });
+                var user = GetMappedUser(await _userService.GetUserById(id));
+
+                return Ok(new { Items = user });
             }
             catch (Exception ex)
             {
@@ -47,9 +55,11 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="user">The user to create.</param>
         [HttpPost("Add")]
-        public async Task<ActionResult> AddUser(UsersDto newUser)
+        public async Task<ActionResult> AddUser(Users newUser)
         {
-            return Ok(new { Items = await _userService.AddUser(newUser) });
+            var users = GetMappedUsersList(await _userService.AddUser(newUser));
+
+            return Ok(new { Items = users });
         }
 
         /// <summary>
@@ -58,11 +68,13 @@ namespace webapi.Controllers
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
         [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateUser(string id, UsersDto updatedUser)
+        public async Task<IActionResult> UpdateUser(int id, Users updatedUser)
         {
             try
             {
-                return Ok(new { Items = await _userService.UpdateUser(id, updatedUser) });
+                var user = GetMappedUser(await _userService.UpdateUser(id, updatedUser));
+
+                return Ok(new { Items = user });
             }
             catch (Exception ex)
             {
@@ -75,16 +87,38 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
             try
             {
-                return Ok(new { Items = await _userService.DeleteUser(id) });
+                var users = GetMappedUsersList(await _userService.DeleteUser(id));
+
+                return Ok(new { Items = users });
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+
+        private UsersDto GetMappedUser(Users user)
+        {
+            return _mapper.Map<UsersDto>(new UsersDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email
+            });
+        }
+
+        private List<UsersDto> GetMappedUsersList(IEnumerable<Users> users)
+        {
+            List<Users> mappedList = users.Select(e =>
+            new Users { Id = e.Id, Name = e.Name, Email = e.Email }).ToList();
+
+            List<UsersDto> usersDtoList = mappedList.Select(c => _mapper.Map<UsersDto>(c)).ToList();
+            return usersDtoList;
+        }
+
     }
 }
