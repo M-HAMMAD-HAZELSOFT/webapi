@@ -7,7 +7,7 @@ using webapi.Services.UserService;
 
 namespace webapi.Controllers
 {
-    [Route("api/")]
+    [Route("api/[controller]")]
     [ApiController]
     public class UsersController : BaseController
     {
@@ -83,11 +83,11 @@ namespace webapi.Controllers
         }
 
         /// <summary>
-        /// login a user.
+        /// Deletes a user by ID.
         /// </summary>
-        /// <param name="user">The user to login.</param>
-        [HttpPost("Login")]
-        public async Task<ActionResult> Login(UsersDto user)
+        /// <param name="id">The ID of the user to delete.</param>
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
         {
             try
             {
@@ -119,5 +119,6 @@ namespace webapi.Controllers
             List<UsersDto> usersDtoList = mappedList.Select(c => _mapper.Map<UsersDto>(c)).ToList();
             return usersDtoList;
         }
+
     }
 }

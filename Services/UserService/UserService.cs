@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using webapi.Data;
 using webapi.Models;
-using webapi.Dtos.Users;
 
 namespace webapi.Services.UserService
 {

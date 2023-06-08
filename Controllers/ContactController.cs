@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using webapi.BaseControllers;
+using AutoMapper;
 using webapi.Dtos.Contact;
+using webapi.BaseControllers;
 using webapi.Services.ContactService;
+using webapi.Models;
 
 namespace webapi.Controllers
 {
@@ -11,10 +13,12 @@ namespace webapi.Controllers
     [ApiController]
     public class ContactController : BaseController
     {
+        private readonly IMapper _mapper;
         private readonly IContactService _contactService;
 
-        public ContactController(IContactService contactService)
+        public ContactController(IMapper mapper, IContactService contactService)
         {
+            _mapper = mapper;
             _contactService = contactService;
         }
 
@@ -24,7 +28,10 @@ namespace webapi.Controllers
         [HttpGet("GetAll")]
         public async Task<ActionResult> GetAll()
         {
-            return Ok(new { Items = await _contactService.GetAll() });
+            var contacts = (await _contactService.GetAll())
+                .Select(c => _mapper.Map<ContactDto>(c)).ToList();
+
+            return Ok(new { Items = contacts });
         }
 
         /// <summary>
@@ -36,7 +43,8 @@ namespace webapi.Controllers
         {
             try
             {
-                return Ok(new { Items = await _contactService.GetById(id) });
+                var contact = await _contactService.GetById(id);
+                return Ok(new { Items = _mapper.Map<ContactDto>(contact) });
             }
             catch (Exception ex)
             {
@@ -49,11 +57,14 @@ namespace webapi.Controllers
         /// </summary>
         /// <param name="newContact">The contact to create.</param>
         [HttpPost("Add")]
-        public async Task<ActionResult> AddUser(ContactDto newContact)
+        public async Task<ActionResult> AddUser(Contact newContact)
         {
             try
             {
-                return Ok(new { Items = await _contactService.Add(newContact) });
+                var contacts = (await _contactService.Add(newContact))
+                    .Select(c => _mapper.Map<ContactDto>(c)).ToList();
+
+                return Ok(new { Items = contacts });
             }
             catch (Exception ex)
             {
@@ -68,11 +79,13 @@ namespace webapi.Controllers
         /// <param name="id">The ID of the contact to update.</param>
         /// <param name="updatedContact">The updated contact details.</param>
         [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateUser(int id, ContactDto updatedContact)
+        public async Task<IActionResult> UpdateUser(int id, Contact updatedContact)
         {
             try
             {
-                return Ok(new { Items = await _contactService.Update(id, updatedContact) });
+                var contact = await _contactService.Update(id, updatedContact);
+
+                return Ok(new { Items = _mapper.Map<ContactDto>(contact) });
             }
             catch (Exception ex)
             {
@@ -89,7 +102,10 @@ namespace webapi.Controllers
         {
             try
             {
-                return Ok(new { Items = await _contactService.Delete(id) });
+                var contacts = (await _contactService.Delete(id))
+                    .Select(c => _mapper.Map<ContactDto>(c)).ToList();
+
+                return Ok(new { Items = contacts });
             }
             catch (Exception ex)
             {

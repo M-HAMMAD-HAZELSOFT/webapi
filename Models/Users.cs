@@ -16,17 +16,18 @@ namespace webapi.Models
         /// Gets or sets the user name.
         /// </summary>
         [Required]
-        public string? UserName { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the password hash.
+        /// Gets or sets the user email.
         /// </summary>
-        public byte[] PasswordHash { get; set; }
+        [Required]
+        public string? Email { get; set; }
 
         /// <summary>
-        /// Gets or sets the password salt.
+        /// Gets or sets the user password.
         /// </summary>
-        public byte[] PasswordSalt { get; set; }
-
+        [Required]
+        public string? Password { get; set; }
     }
 }
