@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 using webapi.Data;
 using webapi.Models;
 using webapi.Dtos.Users;
@@ -11,14 +10,11 @@ namespace webapi.Services.UserService
     /// </summary>
     public class UserService : IUserService
     {
-        // The IMapper instance for mapping between different types
-        private readonly IMapper _mapper;
         // The DataContext instance for accessing the data
-        private readonly DataContext _context; 
+        private readonly DataContext _context;
 
-        public UserService(IMapper mapper, DataContext context)
+        public UserService(DataContext context)
         {
-            _mapper = mapper;
             _context = context;
         }
 
@@ -26,11 +22,11 @@ namespace webapi.Services.UserService
         /// Retrieves all users.
         /// </summary>
         /// <returns>A list of all users.</returns>
-        public async Task<List<UsersDto>> GetAllUsers()
+        public async Task<List<Users>> GetAllUsers()
         {
-            List<Users> user = await _context.Users.ToListAsync();
+            List<Users> users = await _context.Users.ToListAsync();
 
-            return (user.Select(c => _mapper.Map<UsersDto>(c))).ToList();
+            return users;
         }
 
         /// <summary>
@@ -38,14 +34,13 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         /// <returns>The user with the specified ID, or null if not found.</returns>
-        public async Task<UsersDto> GetUserById(int id)
+        public async Task<Users> GetUserById(int id)
         {
             Users user = await _context.Users.FirstOrDefaultAsync(c => c.Id == id);
 
-            UsersDto result = _mapper.Map<UsersDto>(user);
-            if (result != null)
+            if (user != null)
             {
-                return result;
+                return user;
             }
             else
             {
@@ -58,15 +53,13 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="user">The user to add.</param>
         /// <returns>A list of all users including the newly added user.</returns>
-        public async Task<List<UsersDto>> AddUser(UsersDto newUser)
+        public async Task<List<Users>> AddUser(Users newUser)
         {
-            Users user = _mapper.Map<Users>(newUser);
-
             // Add the user to the database
-            await _context.Users.AddAsync(user);
+            await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
-            return (_context.Users.Select(u => _mapper.Map<UsersDto>(u))).ToList();
+            return _context.Users.ToList();
         }
 
         /// <summary>
@@ -75,7 +68,7 @@ namespace webapi.Services.UserService
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
         /// <returns>The updated user object, or null if the user was not found.</returns>
-        public async Task<UsersDto> UpdateUser(int id, UsersDto updatedUser)
+        public async Task<Users> UpdateUser(int id, Users updatedUser)
         {
             // Find the user to update by ID
             Users user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
@@ -90,7 +83,7 @@ namespace webapi.Services.UserService
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
 
-                return _mapper.Map<UsersDto>(user);
+                return user;
             }
             else
             {
@@ -103,7 +96,7 @@ namespace webapi.Services.UserService
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         /// <returns>The deleted user object, or null if the user was not found.</returns>
-        public async Task<List<UsersDto>> DeleteUser(int id)
+        public async Task<List<Users>> DeleteUser(int id)
         {
             // Find the user to delete by ID
             Users user = await _context.Users.FirstAsync(u => u.Id == id);
@@ -114,7 +107,7 @@ namespace webapi.Services.UserService
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
 
-                return (_context.Users.Select(c => _mapper.Map<UsersDto>(c))).ToList();
+                return _context.Users.ToList();
             }
             else
             {
