@@ -9,8 +9,8 @@ using webapi.Models;
 namespace webapi.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class ContactController : BaseController
     {
         private readonly IMapper _mapper;

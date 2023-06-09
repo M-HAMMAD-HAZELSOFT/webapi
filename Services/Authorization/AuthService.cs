@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using webapi.Data;
 using webapi.Models;
+using webapi.Constants;
 
 namespace webapi.Services.Authorization
 {
@@ -13,128 +13,78 @@ namespace webapi.Services.Authorization
     /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly DataContext _context;
         private readonly IConfiguration _configuration;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public AuthService(DataContext context, IConfiguration configuration)
+        public AuthService(IConfiguration configuration,
+            UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
-            _context = context;
             _configuration = configuration;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        /// <summary>
-        /// Adds a user.
-        /// </summary>
-        /// <param name="user">The user to add.</param>
-        /// <param name="password">The password to add.</param>
-        /// <returns>The newly added user id.</returns>
-        public async Task<int> AddUser(Users user, string password)
+        public async Task<string> Login(UserLogin user)
         {
-            if (await AlreadyExists(user.UserName))
+            var result = await _signInManager.PasswordSignInAsync(
+                user.UserName, user.Password, false, false);
+
+            if (result.Succeeded)
             {
-                throw new Exception("User already exist.");
+                return CreateToken(user);
             }
-
-            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
-
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
-
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            return user.Id;
-        }
-
-        /// <summary>
-        /// Login a user.
-        /// </summary>
-        /// <param name="username">The username to match.</param>
-        /// <param name="password">The password to match.</param>
-        /// <returns>The token.</returns>
-        public async Task<string> Login(string username, string password)
-        {
-            Users user = await _context.Users.FirstOrDefaultAsync(
-                x => x.UserName.ToLower().Equals(username.ToLower()));
-
-            if (user == null)
+            else
             {
-                throw new Exception("User not found.");
+                return null;
             }
-            else if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-            {
-                throw new Exception("Password is wrong.");
-            }
-
-            return CreateToken(user);
         }
 
-        public async Task<bool> AlreadyExists(string username)
+        public async Task<bool> Signup(UserSignup user)
         {
-            // Check if any user with the same username already exists in the database
-            var result = await _context.Users.AnyAsync(x => string.IsNullOrEmpty(username)
-            || x.UserName.ToLower() == username.ToLower());
+            var userExsists = _userManager.FindByNameAsync(user.UserName);
 
-            // Return the result directly (true if user already exists, false otherwise)
-            return result;
-        }
-
-        private void CreatePasswordHash(string password, out byte[] passwordHash,
-            out byte[] passwordSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            if (!userExsists.IsCompleted)
             {
-                // Generate a random salt and assign it to the passwordSalt
-                passwordSalt = hmac.Key;
-                // Compute the hash of the provided password using the salt
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
-
-        }
-
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
-            {
-                // Compute the hash of the provided password
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < computedHash.Length; i++)
+                var newUser = new IdentityUser
                 {
-                    // Compare each byte of the computed hash with the stored password hash
-                    if (computedHash[i] != passwordHash[i])
-                    {
-                        // If any byte doesn't match, return false (passwords do not match)
-                        return false;
-                    }
+                    Email = user.Email,
+                    UserName = user.UserName
+                };
+
+                // Creates a new User
+                var result = await _userManager.CreateAsync(newUser, user.Password);
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignInAsync(newUser, isPersistent: false);
+                    return true;
                 }
-                // If all bytes match, return true (passwords match)
-                return true;
             }
+            return false;
         }
 
-        private string CreateToken(Users user)
+        private string CreateToken(UserLogin user)
         {
+            // JWT private key from the config
+            var securityKey = Encoding.UTF8.GetBytes(_configuration.GetSection(IAuthConstants.JwtSecretKey).Value);
+
             // creating the claims list for the JWT token
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
             };
 
-            // JWT private key from the config
-            SymmetricSecurityKey key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value)
-            );
+            SymmetricSecurityKey key = new SymmetricSecurityKey(securityKey);
 
             // creating the credentials from the key
-            SigningCredentials creds = new SigningCredentials(
-                key, SecurityAlgorithms.HmacSha512Signature);
+            SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             // object get the info used to create final token
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(1),
-                SigningCredentials = creds
+                SigningCredentials = credentials
             };
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();

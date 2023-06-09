@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using webapi.Data;
 using webapi.Models;
+using webapi.Resources;
 
 namespace webapi.Services.ContactService
 {
@@ -43,7 +44,7 @@ namespace webapi.Services.ContactService
             }
             else
             {
-                throw new Exception("Contact not found.");
+                throw new Exception(MessageKeys.ContactNotFound);
             }
         }
 
@@ -88,7 +89,7 @@ namespace webapi.Services.ContactService
             }
             else
             {
-                throw new Exception("Contact not found.");
+                throw new Exception(MessageKeys.ContactNotFound);
             }
         }
 
@@ -112,7 +113,7 @@ namespace webapi.Services.ContactService
             }
             else
             {
-                throw new Exception("Contact not found.");
+                throw new Exception(MessageKeys.ContactNotFound);
             }
         }
     }

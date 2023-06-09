@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using webapi.Data;
+using webapi.Constants;
+using webapi.Services.UserService;
 using webapi.Services.Authorization;
 using webapi.Services.ContactService;
 
@@ -13,11 +16,18 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Configure the DataContext with the provided connection string
 builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlServer(connectionString));
 
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<DataContext>();
+
 // Add services to the container.
 builder.Services.AddControllers();
 
 // Register the AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
+
+// Register the UserService implementation
+// For IUserService interface as scoped service.
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Register the ContactService implementation
 // For IContactService interface as scoped service.
@@ -27,8 +37,13 @@ builder.Services.AddScoped<IContactService, ContactService>();
 // For IAuthService interface as scoped service.
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Registers the authentication services using JWT Bearer authentication scheme.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//// Registers the authentication services using JWT Bearer authentication scheme.
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -36,8 +51,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             // Enable validation of the issuer signing key
             ValidateIssuerSigningKey = true,
             // Set the issuer signing key from the app settings
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII
-            .GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+            .GetBytes(builder.Configuration.GetSection(IAuthConstants.JwtSecretKey).Value)),
             // Disable issuer validation
             ValidateIssuer = false,
             // Disable issuer validation
