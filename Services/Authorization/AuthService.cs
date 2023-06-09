@@ -56,7 +56,6 @@ namespace webapi.Services.Authorization
                 var result = await _userManager.CreateAsync(newUser, user.Password);
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(newUser, isPersistent: false);
                     return true;
                 }
             }
