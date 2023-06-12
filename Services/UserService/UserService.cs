@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using webapi.Data;
 using webapi.Models;
-using webapi.Dtos.Users;
+using webapi.Resources;
 
 namespace webapi.Services.UserService
 {
@@ -44,7 +44,7 @@ namespace webapi.Services.UserService
             }
             else
             {
-                throw new Exception("User not found.");
+                throw new Exception(MessageKeys.UserNotFound);
             }
         }
 
@@ -87,7 +87,7 @@ namespace webapi.Services.UserService
             }
             else
             {
-                throw new Exception("User not found.");
+                throw new Exception(MessageKeys.UserNotFound);
             }
         }
 
@@ -111,7 +111,7 @@ namespace webapi.Services.UserService
             }
             else
             {
-                throw new Exception("User not found.");
+                throw new Exception(MessageKeys.UserNotFound);
             }
         }
     }

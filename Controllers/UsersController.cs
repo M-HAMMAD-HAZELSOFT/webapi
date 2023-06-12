@@ -4,11 +4,13 @@ using webapi.Models;
 using webapi.Dtos.Users;
 using webapi.BaseControllers;
 using webapi.Services.UserService;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi.Controllers
 {
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class UsersController : BaseController
     {
         private readonly IUserService _userService;
