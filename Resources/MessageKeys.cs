@@ -36,6 +36,9 @@
         /// </summary>
         public static string UserLoginSuccessfully => "user_login_successfully";
 
-
+        /// <summary>
+        /// "Deleted Successfully."
+        /// </summary>
+        public static string DeletedSuccessfully => "delete_success";
     }
 }

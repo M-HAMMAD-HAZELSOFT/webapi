@@ -5,6 +5,7 @@ using webapi.Dtos.Users;
 using webapi.BaseControllers;
 using webapi.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
+using webapi.Resources;
 
 namespace webapi.Controllers
 {
@@ -55,11 +56,11 @@ namespace webapi.Controllers
         /// <summary>
         /// Creates a new user.
         /// </summary>
-        /// <param name="user">The user to create.</param>
+        /// <param name="newUser">The user to create.</param>
         [HttpPost("Add")]
         public async Task<ActionResult> AddUser(Users newUser)
         {
-            var users = GetMappedUsersList(await _userService.AddUser(newUser));
+            var users = GetMappedUser(await _userService.AddUser(newUser));
 
             return Ok(new { Items = users });
         }
@@ -74,7 +75,7 @@ namespace webapi.Controllers
         {
             try
             {
-                var user = GetMappedUser(await _userService.UpdateUser(id, updatedUser));
+                var user = GetMappedUser(await _userService.UpdateUser(updatedUser));
 
                 return Ok(new { Items = user });
             }
@@ -93,9 +94,14 @@ namespace webapi.Controllers
         {
             try
             {
-                var users = GetMappedUsersList(await _userService.DeleteUser(id));
-
-                return Ok(new { Items = users });
+                if(await _userService.DeleteUser(id))
+                {
+                return Ok(MessageKeys.DeletedSuccessfully);
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
             catch (Exception ex)
             {

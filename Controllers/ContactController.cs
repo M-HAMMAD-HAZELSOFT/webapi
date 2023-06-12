@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
+using webapi.Models;
+using webapi.Resources;
 using webapi.Dtos.Contact;
 using webapi.BaseControllers;
 using webapi.Services.ContactService;
-using webapi.Models;
 
 namespace webapi.Controllers
 {
@@ -61,10 +62,9 @@ namespace webapi.Controllers
         {
             try
             {
-                var contacts = (await _contactService.Add(newContact))
-                    .Select(c => _mapper.Map<ContactDto>(c)).ToList();
+                var contacts = await _contactService.Add(newContact);
 
-                return Ok(new { Items = contacts });
+                return Ok(new { Items = _mapper.Map<ContactDto>(contacts) });
             }
             catch (Exception ex)
             {
@@ -83,7 +83,7 @@ namespace webapi.Controllers
         {
             try
             {
-                var contact = await _contactService.Update(id, updatedContact);
+                var contact = await _contactService.Update(updatedContact);
 
                 return Ok(new { Items = _mapper.Map<ContactDto>(contact) });
             }
@@ -102,10 +102,15 @@ namespace webapi.Controllers
         {
             try
             {
-                var contacts = (await _contactService.Delete(id))
-                    .Select(c => _mapper.Map<ContactDto>(c)).ToList();
+                if (await _contactService.Delete(id))
+                {
+                    return Ok(MessageKeys.DeletedSuccessfully);
+                }
+                else
+                {
+                    return BadRequest();
+                }
 
-                return Ok(new { Items = contacts });
             }
             catch (Exception ex)
             {

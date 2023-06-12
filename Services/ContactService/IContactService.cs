@@ -1,5 +1,4 @@
-﻿using webapi.Dtos.Contact;
-using webapi.Models;
+﻿using webapi.Models;
 
 namespace webapi.Services.ContactService
 {
@@ -25,22 +24,21 @@ namespace webapi.Services.ContactService
         /// Adds a new contact.
         /// </summary>
         /// <param name="newContact">The contact to add.</param>
-        /// <returns>A list of all contacts including the newly added contact.</returns>
-        Task<List<Contact>> Add(Contact newContact);
+        /// <returns>The newly added contact.</returns>
+        Task<Contact> Add(Contact newContact);
 
         /// <summary>
         /// Updates an existing contact.
         /// </summary>
-        /// <param name="id">The ID of the contact to update.</param>
         /// <param name="updatedContact">The updated contact object.</param>
         /// <returns>The updated contact object.</returns>
-        Task<Contact> Update(int id, Contact updatedContact);
+        Task<Contact> Update(Contact updatedContact);
 
         /// <summary>
         /// Deletes a contact by their ID.
         /// </summary>
         /// <param name="id">The ID of the contact to delete.</param>
-        /// <returns>The deleted contact object.</returns>
-        Task<List<Contact>> Delete(int id);
+        /// <returns>The boolean flag.</returns>
+        Task<bool> Delete(int id);
     }
 }

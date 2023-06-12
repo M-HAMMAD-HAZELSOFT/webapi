@@ -24,22 +24,21 @@ namespace webapi.Services.UserService
         /// Adds a new user.
         /// </summary>
         /// <param name="user">The user to add.</param>
-        /// <returns>A list of all users including the newly added user.</returns>
-        Task<List<Users>> AddUser(Users newUser);
+        /// <returns>The newly added user.</returns>
+        Task<Users> AddUser(Users newUser);
 
         /// <summary>
         /// Updates an existing user.
         /// </summary>
-        /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user object.</param>
         /// <returns>The updated user object.</returns>
-        Task<Users> UpdateUser(int id, Users updatedUser);
+        Task<Users> UpdateUser(Users updatedUser);
 
         /// <summary>
         /// Deletes a user by their ID.
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
-        /// <returns>The deleted user object.</returns>
-        Task<List<Users>> DeleteUser(int id);
+        /// <returns>The boolean flag.</returns>
+        Task<bool> DeleteUser(int id);
     }
 }
