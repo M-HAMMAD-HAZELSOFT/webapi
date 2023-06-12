@@ -6,6 +6,7 @@ using webapi.Resources;
 using webapi.Dtos.Contact;
 using webapi.BaseControllers;
 using webapi.Services.ContactService;
+using webapi.Shared.Models;
 
 namespace webapi.Controllers
 {
@@ -22,6 +23,28 @@ namespace webapi.Controllers
             _mapper = mapper;
             _contactService = contactService;
         }
+
+        /// <summary>
+        /// Get all entities.
+        /// </summary>
+        /// <param name="queryStringParams">The query string params.</param>
+        /// <returns>An ActionResult.</returns>
+        [HttpGet]
+        public IActionResult GetAll([FromQuery] QueryStringParams queryStringParams)
+        {
+            PagedResult<Contact> result;
+
+            try
+            {
+                result = _contactService.GetPagedResult(queryStringParams);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok(result);
+        }
+
 
         /// <summary>
         /// Retrieves all contacts.

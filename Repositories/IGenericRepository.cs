@@ -5,8 +5,22 @@ namespace webapi.Repositories
     //Here, we are creating the IGenericRepository interface as a Generic Interface
     //Here, we are applying the Generic Constraint 
     //The constraint is, T is going to be a class
-    public interface IGenericRepository<T>
+    public interface IGenericRepository<T> where T : class
     {
+        /// <summary>
+        /// Gets the records of the entity.
+        /// </summary>
+        /// <param name="search">The search.</param>
+        /// <param name="orderBy">The order by.</param>
+        /// <param name="pageSize">The page size.</param>
+        /// <param name="currentPage">The current page.</param>
+        /// <returns>A list of entites.</returns>
+        QueryResult<T> GetPaginatedByQuery(
+            string search = null,
+            string orderBy = "Id desc",
+            int pageSize = 10,
+            int currentPage = 1);
+
         /// <summary>
         /// Gets the list of all entities.
         /// </summary>

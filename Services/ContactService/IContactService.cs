@@ -1,4 +1,5 @@
 ﻿using webapi.Models;
+using webapi.Shared.Models;
 
 namespace webapi.Services.ContactService
 {
@@ -7,6 +8,13 @@ namespace webapi.Services.ContactService
     /// </summary>
     public interface IContactService
     {
+        /// <summary>
+        /// Gets the paged result.
+        /// </summary>
+        /// <param name="queryStringParams">The query string params.</param>
+        /// <returns>A PagedResult.</returns>
+        PagedResult<Contact> GetPagedResult(QueryStringParams queryStringParams);
+
         /// <summary>
         /// Retrieves all contacts.
         /// </summary>

@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using webapi.Models;
+using webapi.Resources;
 using webapi.Dtos.Users;
+using webapi.Shared.Models;
 using webapi.BaseControllers;
 using webapi.Services.UserService;
-using Microsoft.AspNetCore.Authorization;
-using webapi.Resources;
+
 
 namespace webapi.Controllers
 {
@@ -21,6 +23,27 @@ namespace webapi.Controllers
         {
             _userService = userService;
             _mapper = mapper;
+        }
+
+        /// <summary>
+        /// Get all entities.
+        /// </summary>
+        /// <param name="queryStringParams">The query string params.</param>
+        /// <returns>An ActionResult.</returns>
+        [HttpGet]
+        public IActionResult GetAll([FromQuery] QueryStringParams queryStringParams)
+        {
+            PagedResult<Users> result;
+
+            try
+            {
+                result = _userService.GetPagedResult(queryStringParams);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok(result);
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using webapi.Data;
 
@@ -19,6 +21,37 @@ namespace webapi.Repositories
             _dataContext = dataContext;
             _dbSet = _dataContext.Set<T>();
 
+        }
+
+        /// <summary>
+        /// Gets the Records of the entity,
+        /// </summary>
+        /// <param name="search">The filter.</param>
+        /// <param name="orderBy">The order by.</param>
+        /// <param name="pageSize">The page size.</param>
+        /// <param name="currentPage">The current page.</param>
+        /// <returns>A list of entities.</returns>
+        public QueryResult<T> GetPaginatedByQuery(
+            string search = null,
+            string orderBy = "Id desc",
+            int pageSize = 10,
+            int currentPage = 1)
+        {
+            int count;
+            IQueryable<T> query = _dbSet;
+
+            if (search != null)
+                query = query.Where(search);
+
+            if (orderBy != null)
+                query = query.OrderBy(orderBy);
+
+            count = _dbSet.Count();
+
+            query = query.Skip((currentPage - 1) * pageSize)
+                    .Take(pageSize);
+
+            return new QueryResult<T>() { Count = count, List = query.ToList() };
         }
 
         // This method will return all the Records from the dbSet.

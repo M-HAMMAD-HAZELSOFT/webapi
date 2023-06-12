@@ -3,6 +3,7 @@ using webapi.Data;
 using webapi.Models;
 using webapi.Resources;
 using webapi.Repositories;
+using webapi.Shared.Models;
 
 namespace webapi.Services.ContactService
 {
@@ -17,6 +18,28 @@ namespace webapi.Services.ContactService
         {
             _genericRepository = new GenericRepository<Contact>(context);
 
+        }
+
+        public PagedResult<Contact> GetPagedResult(QueryStringParams queryStringParams)
+        {
+            PagedResult<Contact> result = null;
+
+            QueryResult<Contact> queryResult = _genericRepository.GetPaginatedByQuery(
+                queryStringParams.Search,
+                queryStringParams.OrderBy,
+                queryStringParams.PageSize,
+                queryStringParams.PageNumber);
+
+            int total = queryResult.Count;
+            IEnumerable<Contact> list = queryResult.List;
+
+            result = new PagedResult<Contact>(
+                      total,
+                      queryStringParams.PageNumber,
+                      list.ToList(),
+                      queryStringParams.PageSize
+                  );
+            return result;
         }
 
         /// <summary>

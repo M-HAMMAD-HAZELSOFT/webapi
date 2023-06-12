@@ -1,4 +1,5 @@
 ﻿using webapi.Models;
+using webapi.Shared.Models;
 
 namespace webapi.Services.UserService
 {
@@ -7,6 +8,13 @@ namespace webapi.Services.UserService
     /// </summary>
     public interface IUserService
     {
+        /// <summary>
+        /// Gets the paged result.
+        /// </summary>
+        /// <param name="queryStringParams">The query string params.</param>
+        /// <returns>A PagedResult.</returns>
+        PagedResult<Users> GetPagedResult(QueryStringParams queryStringParams);
+
         /// <summary>
         /// Retrieves all users.
         /// </summary>

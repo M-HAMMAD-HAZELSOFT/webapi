@@ -3,6 +3,7 @@ using webapi.Data;
 using webapi.Models;
 using webapi.Resources;
 using webapi.Repositories;
+using webapi.Shared.Models;
 
 namespace webapi.Services.UserService
 {
@@ -16,6 +17,28 @@ namespace webapi.Services.UserService
         public UserService(DataContext context)
         {
             _genericRepository = new GenericRepository<Users>(context);
+        }
+
+        public PagedResult<Users> GetPagedResult(QueryStringParams queryStringParams)
+        {
+            PagedResult<Users> result = null;
+
+            QueryResult<Users> queryResult = _genericRepository.GetPaginatedByQuery(
+                queryStringParams.Search,
+                queryStringParams.OrderBy,
+                queryStringParams.PageSize,
+                queryStringParams.PageNumber);
+
+            int total = queryResult.Count;
+            IEnumerable<Users> list = queryResult.List;
+
+            result = new PagedResult<Users>(
+                      total,
+                      queryStringParams.PageNumber,
+                      list.ToList(),
+                      queryStringParams.PageSize
+                  );
+            return result;
         }
 
         /// <summary>
