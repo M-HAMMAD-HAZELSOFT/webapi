@@ -15,19 +15,19 @@ namespace webapi.Shared.Services.Email
         /// <summary>
         /// Initializes a new instance of the <see cref="EmailSender"/> class.
         /// </summary>
-        /// <param name="emailConfig"></param>
+        /// <param name="emailConfig">The email configuration.</param>
         public EmailSender(EmailConfiguration emailConfig)
         {
             _emailConfig = emailConfig;
         }
 
         /// <summary>
-        /// Sends the email async.
+        /// Sends the email asynchronously.
         /// </summary>
-        /// <param name="email">The email.</param>
-        /// <param name="subject">The subject.</param>
-        /// <param name="message">The message.</param>
-        /// <returns>A Task.</returns>
+        /// <param name="email">The recipient's email address.</param>
+        /// <param name="subject">The email subject.</param>
+        /// <param name="message">The email content.</param>
+        /// <returns>A task representing the asynchronous email sending proce
         public async Task SendEmailAsync(string email, string subject, string message)
         {
             var emailMsg = new EmailMessage(new string[] { email }, subject, $"{message}");
@@ -35,9 +35,9 @@ namespace webapi.Shared.Services.Email
         }
 
         /// <summary>
-        /// Sends the email
+        /// Sends the email.
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">The email message to be sent.</param>
         public void SendEmail(EmailMessage message)
         {
             var emailMessage = CreateEmailMessage(message);
@@ -45,10 +45,10 @@ namespace webapi.Shared.Services.Email
         }
 
         /// <summary>
-        /// Create the email message
+        /// Creates a MimeMessage from the provided EmailMessage.
         /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
+        /// <param name="message">The email message.</param>
+        /// <returns>The constructed MimeMessage.</returns>
         private MimeMessage CreateEmailMessage(EmailMessage message)
         {
             var emailMessage = new MimeMessage();
@@ -61,9 +61,9 @@ namespace webapi.Shared.Services.Email
         }
 
         /// <summary>
-        /// Send the email using smpt
+        /// Sends the email using SMTP.
         /// </summary>
-        /// <param name="mailMessage"></param>
+        /// <param name="mailMessage">The MimeMessage to be sent.</param>
         private void Send(MimeMessage mailMessage)
         {
             using var client = new SmtpClient();
