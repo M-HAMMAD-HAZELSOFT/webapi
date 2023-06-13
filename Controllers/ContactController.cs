@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
+using webapi.Models;
+using webapi.Resources;
 using webapi.Dtos.Contact;
+using webapi.Shared.Models;
 using webapi.BaseControllers;
 using webapi.Services.ContactService;
-using webapi.Models;
 
 namespace webapi.Controllers
 {
@@ -21,6 +23,28 @@ namespace webapi.Controllers
             _mapper = mapper;
             _contactService = contactService;
         }
+
+        /// <summary>
+        /// Get all entities.
+        /// </summary>
+        /// <param name="queryStringParams">The query string params.</param>
+        /// <returns>An ActionResult.</returns>
+        [HttpGet]
+        public IActionResult GetAll([FromQuery] QueryStringParams queryStringParams)
+        {
+            PagedResult<Contact> result;
+
+            try
+            {
+                result = _contactService.GetPagedResult(queryStringParams);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok(result);
+        }
+
 
         /// <summary>
         /// Retrieves all contacts.
@@ -61,10 +85,9 @@ namespace webapi.Controllers
         {
             try
             {
-                var contacts = (await _contactService.Add(newContact))
-                    .Select(c => _mapper.Map<ContactDto>(c)).ToList();
+                var contacts = await _contactService.Add(newContact);
 
-                return Ok(new { Items = contacts });
+                return Ok(new { Items = _mapper.Map<ContactDto>(contacts) });
             }
             catch (Exception ex)
             {
@@ -83,7 +106,7 @@ namespace webapi.Controllers
         {
             try
             {
-                var contact = await _contactService.Update(id, updatedContact);
+                var contact = await _contactService.Update(updatedContact);
 
                 return Ok(new { Items = _mapper.Map<ContactDto>(contact) });
             }
@@ -102,10 +125,15 @@ namespace webapi.Controllers
         {
             try
             {
-                var contacts = (await _contactService.Delete(id))
-                    .Select(c => _mapper.Map<ContactDto>(c)).ToList();
+                if (await _contactService.Delete(id))
+                {
+                    return Ok(MessageKeys.DeletedSuccessfully);
+                }
+                else
+                {
+                    return BadRequest();
+                }
 
-                return Ok(new { Items = contacts });
             }
             catch (Exception ex)
             {
