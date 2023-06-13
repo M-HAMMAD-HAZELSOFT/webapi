@@ -40,5 +40,20 @@
         /// "Deleted Successfully."
         /// </summary>
         public static string DeletedSuccessfully => "delete_success";
+
+        /// <summary>
+        /// "Invalid Input Parameters."
+        /// </summary>
+        public static string InvalidInputParameters => "invalid_input";
+
+        /// <summary>
+        /// "Email is not verified."
+        /// </summary>
+        public static string EmailIsNotVerified => "email_is_not_verified";
+
+        /// <summary>
+        /// "Email is verified."
+        /// </summary>
+        public static string EmailIstVerified => "email_is_verified";
     }
 }

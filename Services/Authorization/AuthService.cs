@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using webapi.Models;
 using webapi.Constants;
+using webapi.Services.Email;
 
 namespace webapi.Services.Authorization
 {
@@ -16,13 +17,17 @@ namespace webapi.Services.Authorization
         private readonly IConfiguration _configuration;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IAuthEmailService _authEmailService;
 
         public AuthService(IConfiguration configuration,
-            UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            IAuthEmailService authEmailService)
         {
             _configuration = configuration;
             _userManager = userManager;
             _signInManager = signInManager;
+            _authEmailService = authEmailService;
         }
 
         public async Task<string> Login(UserLogin user)
@@ -42,9 +47,9 @@ namespace webapi.Services.Authorization
 
         public async Task<bool> Signup(UserSignup user)
         {
-            var userExsists = _userManager.FindByNameAsync(user.UserName);
+            var userExsists = await _userManager.FindByNameAsync(user.UserName);
 
-            if (!userExsists.IsCompleted)
+            if (userExsists == null)
             {
                 var newUser = new IdentityUser
                 {
@@ -54,10 +59,48 @@ namespace webapi.Services.Authorization
 
                 // Creates a new User
                 var result = await _userManager.CreateAsync(newUser, user.Password);
+
                 if (result.Succeeded)
                 {
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                    //Send Confirmation email
+                    await _authEmailService.SendEmailConfirmation(newUser.Id, token, newUser.Email, user.Password);
+
                     return true;
                 }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Verifies the email.
+        /// </summary>
+        /// <param name="dto">The verify email dto.</param>
+        /// <returns>A Task of UserRegistrationResult.</returns>
+        public async Task<bool> VerifyEmail(VerifyEmail model)
+        {
+            try
+            {
+                var authUser = await _userManager.FindByIdAsync(model.UserId);
+                if (authUser == null) return false;
+
+                // Verify email
+                string email = Encoding.Default.GetString(Convert.FromBase64String(model.Email));
+                if (string.Compare(email, authUser.Email, true) != 0) return false;
+
+                // Verify token
+                string token = Encoding.Default.GetString(Convert.FromBase64String(model.Token));
+
+                if (model.Flag == 0)
+                {
+                    var result = await _userManager.ConfirmEmailAsync(authUser, token);
+                    if (result.Succeeded)
+                        return true;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
             return false;
         }

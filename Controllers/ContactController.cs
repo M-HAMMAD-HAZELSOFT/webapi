@@ -4,9 +4,9 @@ using AutoMapper;
 using webapi.Models;
 using webapi.Resources;
 using webapi.Dtos.Contact;
+using webapi.Shared.Models;
 using webapi.BaseControllers;
 using webapi.Services.ContactService;
-using webapi.Shared.Models;
 
 namespace webapi.Controllers
 {

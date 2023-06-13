@@ -8,6 +8,10 @@ using webapi.Constants;
 using webapi.Services.UserService;
 using webapi.Services.Authorization;
 using webapi.Services.ContactService;
+using webapi.Shared.Services.Email;
+using webapi.Shared.Services.Email.Model;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using webapi.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +20,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Configure the DataContext with the provided connection string
 builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlServer(connectionString));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<DataContext>();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(
+    op =>
+    {
+        op.SignIn.RequireConfirmedAccount = true;
+        op.SignIn.RequireConfirmedEmail = true;
+    })
+    .AddEntityFrameworkStores<DataContext>()
+    .AddDefaultTokenProviders();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -59,6 +69,16 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = false
         };
     });
+
+// Inject email sending service for users' email verification. 
+builder.Services.AddScoped<IAuthEmailService, AuthEmailService>();
+
+// Inject email sending service for users' email verification. 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+// Sets the EmailConfiguration properties.
+var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
