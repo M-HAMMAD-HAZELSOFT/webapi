@@ -2,6 +2,8 @@
 using webapi.Data;
 using webapi.Models;
 using webapi.Resources;
+using webapi.Repositories;
+using webapi.Shared.Models;
 
 namespace webapi.Services.UserService
 {
@@ -10,12 +12,33 @@ namespace webapi.Services.UserService
     /// </summary>
     public class UserService : IUserService
     {
-        // The DataContext instance for accessing the data
-        private readonly DataContext _context;
+        private readonly IGenericRepository<Users> _genericRepository;
 
         public UserService(DataContext context)
         {
-            _context = context;
+            _genericRepository = new GenericRepository<Users>(context);
+        }
+
+        public PagedResult<Users> GetPagedResult(QueryStringParams queryStringParams)
+        {
+            PagedResult<Users> result = null;
+
+            QueryResult<Users> queryResult = _genericRepository.GetPaginatedByQuery(
+                queryStringParams.Search,
+                queryStringParams.OrderBy,
+                queryStringParams.PageSize,
+                queryStringParams.PageNumber);
+
+            int total = queryResult.Count;
+            IEnumerable<Users> list = queryResult.List;
+
+            result = new PagedResult<Users>(
+                      total,
+                      queryStringParams.PageNumber,
+                      list.ToList(),
+                      queryStringParams.PageSize
+                  );
+            return result;
         }
 
         /// <summary>
@@ -24,7 +47,7 @@ namespace webapi.Services.UserService
         /// <returns>A list of all users.</returns>
         public async Task<List<Users>> GetAllUsers()
         {
-            List<Users> users = await _context.Users.ToListAsync();
+            List<Users> users = (List<Users>)await _genericRepository.GetAll();
 
             return users;
         }
@@ -36,7 +59,7 @@ namespace webapi.Services.UserService
         /// <returns>The user with the specified ID, or null if not found.</returns>
         public async Task<Users> GetUserById(int id)
         {
-            Users user = await _context.Users.FirstOrDefaultAsync(c => c.Id == id);
+            Users user = await _genericRepository.GetById(x => x.Id == id).FirstOrDefaultAsync();
 
             if (user != null)
             {
@@ -52,37 +75,29 @@ namespace webapi.Services.UserService
         /// Adds a new user.
         /// </summary>
         /// <param name="user">The user to add.</param>
-        /// <returns>A list of all users including the newly added user.</returns>
-        public async Task<List<Users>> AddUser(Users newUser)
+        /// <returns>The newly added user.</returns>
+        public async Task<Users> AddUser(Users newUser)
         {
             // Add the user to the database
-            await _context.Users.AddAsync(newUser);
-            await _context.SaveChangesAsync();
+            _genericRepository.Insert(newUser);
 
-            return _context.Users.ToList();
+            return newUser;
         }
 
         /// <summary>
         /// Updates an existing user.
         /// </summary>
-        /// <param name="id">The ID of the user to update.</param>
         /// <param name="updatedUser">The updated user details.</param>
         /// <returns>The updated user object, or null if the user was not found.</returns>
-        public async Task<Users> UpdateUser(int id, Users updatedUser)
+        public async Task<Users> UpdateUser(Users updatedUser)
         {
+            _genericRepository.Update(updatedUser);
+
             // Find the user to update by ID
-            Users user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            Users user = await _genericRepository.GetById(x => x.Id == updatedUser.Id).FirstOrDefaultAsync();
 
             if (user != null)
             {
-                // Update the user 
-                user.Name = updatedUser.Name;
-                user.Email = updatedUser.Email;
-                user.Password = updatedUser.Password;
-
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
-
                 return user;
             }
             else
@@ -95,19 +110,16 @@ namespace webapi.Services.UserService
         /// Deletes a user by ID.
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
-        /// <returns>The deleted user object, or null if the user was not found.</returns>
-        public async Task<List<Users>> DeleteUser(int id)
+        /// <returns>The boolean flag.</returns>
+        public async Task<bool> DeleteUser(int id)
         {
             // Find the user to delete by ID
-            Users user = await _context.Users.FirstAsync(u => u.Id == id);
+            var user = await _genericRepository.GetById(x => x.Id == id).FirstOrDefaultAsync();
 
             if (user != null)
             {
                 // Remove the user from the database
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
-
-                return _context.Users.ToList();
+                return _genericRepository.Delete(user);
             }
             else
             {

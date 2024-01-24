@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using webapi.BaseControllers;
 using webapi.Models;
 using webapi.Resources;
+using webapi.BaseControllers;
 using webapi.Services.Authorization;
 
 namespace webapi.Controllers
@@ -44,6 +44,30 @@ namespace webapi.Controllers
             {
                 return BadRequest(MessageKeys.InvalidUserNameOrPassword);
             }
+        }
+
+        /// <summary>
+        /// Verifies the email of registered user (new user or email changed).
+        /// </summary>
+        /// <param name="model">The model containing user identity, token and code.</param>
+        /// <returns>Returns user login result if email is verified successfully.</returns>
+        [HttpGet("VerifyEmail")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] VerifyEmail model)
+        {
+            // Checking if the passed Model is valid
+            if (!ModelState.IsValid || model == null)
+            {
+                return BadRequest(MessageKeys.InvalidInputParameters);
+            }
+
+            // Verifying user email
+            var result = await _authService.VerifyEmail(model);
+
+            if (!result)
+                return BadRequest(MessageKeys.EmailIsNotVerified);
+
+            // Return user login json
+            return Ok(MessageKeys.EmailIstVerified);
         }
     }
 }
